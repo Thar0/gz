@@ -108,7 +108,7 @@ static int movie_pos_proc(struct menu_item *item,
   return 0;
 }
 
-static int do_import_macro(const char *path, void *data)
+int do_import_macro(const char *path, void *data)
 {
   const char *s_eof = "unexpected end of file";
   const char *s_memory = "out of memory";
@@ -220,6 +220,7 @@ static int do_import_macro(const char *path, void *data)
       vector_shrink_to_fit(&gz.movie_oca_sync);
       vector_shrink_to_fit(&gz.movie_room_load);
     }
+    gz.last_path_imported = path;
 f_err:
     sys_io_mode(SYS_IO_PIO);
     if (errno != 0)
@@ -587,6 +588,21 @@ static int wiivc_cam_proc(struct menu_item *item,
   return 0;
 }
 
+static int multi_part_proc(struct menu_item *item,
+                          enum menu_callback_reason reason,
+                          void *data)
+{
+  if (reason == MENU_CALLBACK_SWITCH_ON)
+    settings->bits.multi_part_movie = 1;
+  else if (reason == MENU_CALLBACK_SWITCH_OFF)
+    settings->bits.multi_part_movie = 0;
+  else if (reason == MENU_CALLBACK_THINK) {
+    if (menu_checkbox_get(item) != settings->bits.multi_part_movie)
+      menu_checkbox_set(item, settings->bits.multi_part_movie);
+  }
+  return 0;
+}
+
 static int vcont_enable_proc(struct menu_item *item,
                              enum menu_callback_reason reason,
                              void *data)
@@ -762,6 +778,9 @@ struct menu *gz_macro_menu(void)
   menu_add_static(&menu_settings, 0, 5, "game settings", 0xC0C0C0);
   menu_add_checkbox(&menu_settings, 2, 6, wiivc_cam_proc, NULL);
   menu_add_static(&menu_settings, 4, 6, "wii vc camera", 0xC0C0C0);
+  menu_add_static(&menu_settings, 0, 7, "movie settings", 0xC0C0C0);
+  menu_add_checkbox(&menu_settings, 2, 8, multi_part_proc, NULL);
+  menu_add_static(&menu_settings, 4, 8, "multi part", 0xC0C0C0);
 
   /* populate virtual pad menu */
   menu_vcont.selector = menu_add_submenu(&menu_vcont, 0, 0, NULL, "return");

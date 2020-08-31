@@ -162,6 +162,7 @@ struct gz
   z64_controller_t      z_input_mask;
   _Bool                 vcont_enabled[4];
   z64_input_t           vcont_input[4];
+  char                 *last_path_imported;
   int32_t               frame_counter;
   int32_t               lag_vi_offset;
   int64_t               cpu_counter;

@@ -26,6 +26,7 @@ __attribute__((section(".data")))
 struct gz gz =
 {
   .ready = 0,
+  .last_path_imported = NULL,
 };
 
 static void update_cpu_counter(void)
@@ -539,6 +540,9 @@ static void mask_input(z64_input_t *input)
   input->adjusted_y = zu_adjust_joystick(input->raw.y);
 }
 
+void command_playmacro(void);
+int do_import_macro(const char *path, void *data);
+
 HOOK void input_hook(void)
 {
   maybe_init_gp();
@@ -577,7 +581,10 @@ HOOK void input_hook(void)
       if (gz.movie_frame >= gz.movie_input.size) {
         if (input_bind_held(COMMAND_PLAYMACRO) && gz.movie_input.size > 0)
           gz_movie_rewind();
-        else
+        else if (settings->bits.multi_part_movie && gz.last_path_imported != NULL) {
+          do_import_macro(gz.last_path_imported, NULL); // TODO change the path to the next part
+          command_playmacro();
+        } else
           gz.movie_state = MOVIE_IDLE;
       }
       if (gz.movie_state == MOVIE_PLAYING) {
