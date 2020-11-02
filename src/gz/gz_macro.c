@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <inttypes.h>
 #include "files.h"
 #include "gz.h"
@@ -220,7 +221,7 @@ int do_import_macro(const char *path, void *data)
       vector_shrink_to_fit(&gz.movie_oca_sync);
       vector_shrink_to_fit(&gz.movie_room_load);
     }
-    gz.last_path_imported = path;
+    strcpy(gz.last_path_imported, path);
 f_err:
     sys_io_mode(SYS_IO_PIO);
     if (errno != 0)

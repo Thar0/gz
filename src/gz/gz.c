@@ -26,7 +26,6 @@ __attribute__((section(".data")))
 struct gz gz =
 {
   .ready = 0,
-  .last_path_imported = NULL,
 };
 
 static void update_cpu_counter(void)
@@ -434,6 +433,9 @@ static void main_hook(void)
     gfx_printf(font, msg_x, msg_y, "%s", ent->msg);
   }
 
+  gfx_mode_set(GFX_MODE_COLOR, GPACK_RGBA8888(0xC0, 0xC0, 0xC0, alpha));
+  gfx_printf(font, 20, Z64_SCREEN_HEIGHT - 10, "%s", gz.last_path_imported);
+
   /* finish frame */
   gfx_flush();
 }
@@ -540,9 +542,6 @@ static void mask_input(z64_input_t *input)
   input->adjusted_y = zu_adjust_joystick(input->raw.y);
 }
 
-void command_playmacro(void);
-int do_import_macro(const char *path, void *data);
-
 HOOK void input_hook(void)
 {
   maybe_init_gp();
@@ -581,9 +580,9 @@ HOOK void input_hook(void)
       if (gz.movie_frame >= gz.movie_input.size) {
         if (input_bind_held(COMMAND_PLAYMACRO) && gz.movie_input.size > 0)
           gz_movie_rewind();
-        else if (settings->bits.multi_part_movie && gz.last_path_imported != NULL) {
-          do_import_macro(gz.last_path_imported, NULL); // TODO change the path to the next part
-          command_playmacro();
+        else if (settings->bits.multi_part_movie && gz.last_path_imported[0] != 0) {
+          if (do_import_macro(gz.last_path_imported, NULL)) // TODO change the path to the next part
+            gz.movie_state = MOVIE_IDLE;
         } else
           gz.movie_state = MOVIE_IDLE;
       }
@@ -1071,6 +1070,8 @@ static void init(void)
     gz.state_buf[i] = NULL;
   gz.state_slot = 0;
   gz.reset_flag = 0;
+
+  memset(gz.last_path_imported, 0, sizeof(gz.last_path_imported));
 
   /* load settings */
   if (input_z_pad() == BUTTON_START || !settings_load(gz.profile))

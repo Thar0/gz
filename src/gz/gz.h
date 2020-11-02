@@ -4,6 +4,7 @@
 #include <vector/vector.h>
 #include <n64.h>
 #include "settings.h"
+#include "sys.h"
 #include "z64.h"
 #include "zu.h"
 
@@ -162,7 +163,7 @@ struct gz
   z64_controller_t      z_input_mask;
   _Bool                 vcont_enabled[4];
   z64_input_t           vcont_input[4];
-  char                 *last_path_imported;
+  char                  last_path_imported[PATH_MAX];
   int32_t               frame_counter;
   int32_t               lag_vi_offset;
   int64_t               cpu_counter;
@@ -235,6 +236,8 @@ void          command_resettimer(void);
 void          command_starttimer(void);
 void          command_stoptimer(void);
 void          command_reset(void);
+
+int           do_import_macro(const char *path, void *data);
 
 void          z_to_movie(int movie_frame, z64_input_t *zi, _Bool reset);
 void          movie_to_z(int movie_frame, z64_input_t *zi, _Bool *reset);
