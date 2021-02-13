@@ -30,7 +30,7 @@ struct zu_scene_info zu_scene_info[] =
     "forest temple",
     3, (const char*[])
     {
-      "from meadow",
+      "from nayru's tears",
       "from boss",
       "ceiling crush room",
     },
@@ -47,7 +47,7 @@ struct zu_scene_info zu_scene_info[] =
     "water temple",
     2, (const char*[])
     {
-      "from lake",
+      "from forbidden woods",
       "from boss",
     },
   },
@@ -64,28 +64,27 @@ struct zu_scene_info zu_scene_info[] =
   },
   {
     "shadow temple",
-    4, (const char*[])
+    5, (const char*[])
     {
-      "from graveyard",
-      "outside boss",
-      "from boss (crashes)",
-      "(crashes)",
+      "from lower left grave",
+      "from middle grave",
+      "from back grave",
+      "silver gauntlets",
+      "from hall of the dead",
     },
   },
   {
-    "bottom of the well",
-    2, (const char*[])
+    "sheikah crypt",
+    1, (const char*[])
     {
-      "from kakariko",
-      "from kakariko (unused)",
+      "from river",
     },
   },
   {
-    "ice cavern",
-    2, (const char*[])
+    "crystal shrine",
+    1, (const char*[])
     {
-      "from fountain",
-      "near block puzzle room",
+      "from snow path",
     },
   },
   {
@@ -98,29 +97,18 @@ struct zu_scene_info zu_scene_info[] =
     },
   },
   {
-    "gerudo training ground",
+    "dragmire shrine",
     1, (const char*[])
     {
-      "from fortress",
+      "from wasteland",
     },
   },
   {
-    "thieves' hideout",
-    13, (const char*[])
+    "nayru's tears",
+    2, (const char*[])
     {
-      "1-1",
-      "1-2",
-      "1-3",
-      "2-3",
-      "1-4",
-      "1-2",
-      "1-4",
-      "3-3",
-      "3-2",
-      "4-1",
-      "1-1",
-      "prison",
-      "3-1",
+      "from woods",
+      "from forest temple",
     },
   },
   {
@@ -159,10 +147,11 @@ struct zu_scene_info zu_scene_info[] =
     },
   },
   {
-    "treasure box shop",
-    1, (const char*[])
+    "forbidden woods",
+    2, (const char*[])
     {
-      "from market",
+      "from woods",
+      "from water temple",
     },
   },
   {
@@ -245,127 +234,92 @@ struct zu_scene_info zu_scene_info[] =
     },
   },
   {
-    "market entrance day",
-    3, (const char*[])
+    "market entrance day (unused)",
+    1, (const char*[])
     {
-      "from market",
-      "from field",
-      "from pots",
+      "(none)",
     },
   },
   {
-    "market entrance night",
-    3, (const char*[])
+    "market entrance night (unused)",
+    1, (const char*[])
     {
-      "from market",
-      "from field",
-      "from pots",
+      "(none)",
     },
   },
   {
-    "market entrance ruins",
-    3, (const char*[])
+    "market entrance ruins (unused)",
+    1, (const char*[])
     {
-      "from market",
-      "from field",
-      "from pots",
+      "(none)",
     },
   },
   {
-    "back alley day",
-    5, (const char*[])
+    "deepwood shrine",
+    1, (const char*[])
+    {
+      "from woods",
+    },
+  },
+  {
+    "back alley night (unused)",
+    2, (const char*[])
     {
       "from market right",
       "from market left",
-      "from bombchu shop",
-      "from guy's house",
-      "from richard's house",
     },
   },
   {
-    "back alley night",
-    5, (const char*[])
-    {
-      "from market right",
-      "from market left",
-      "from bombchu shop",
-      "from guy's house",
-      "from richard's house",
-    },
-  },
-  {
-    "market day",
-    11, (const char*[])
-    {
-      "from entrance",
-      "from castle",
-      "from temple",
-      "from alley right",
-      "from alley left",
-      "from potion shop",
-      "from bazaar",
-      "from bowling alley",
-      "from shooting gallery",
-      "from mask shop",
-      "from box shop",
-    },
-  },
-  {
-    "market night",
-    11, (const char*[])
-    {
-      "from entrance",
-      "from castle",
-      "from temple",
-      "from alley right",
-      "from alley left",
-      "from potion shop",
-      "from bazaar",
-      "from bowling alley",
-      "from shooting gallery",
-      "from mask shop",
-      "from box shop",
-    },
-  },
-  {
-    "market ruins",
-    11, (const char*[])
-    {
-      "from entrance",
-      "from castle",
-      "from temple",
-      "from alley right",
-      "from alley left",
-      "from potion shop",
-      "from bazaar",
-      "from bowling alley",
-      "from shooting gallery",
-      "from mask shop",
-      "from box shop",
-    },
-  },
-  {
-    "outside temple day",
+    "the pit",
     2, (const char*[])
     {
-      "from market",
-      "from temple",
+      "thrown in",
+      "from refuge",
     },
   },
   {
-    "outside temple night",
-    2, (const char*[])
+    "market night (unused)",
+    1, (const char*[])
     {
-      "from market",
-      "from temple",
+      "(none)",
     },
   },
   {
-    "outside temple ruins",
-    2, (const char*[])
+    "market ruins (unused)",
+    1, (const char*[])
     {
-      "from market",
-      "from temple",
+      "(none)",
+    },
+  },
+  {
+    "twilight temple",
+    1, (const char*[])
+    {
+      "from kakariko",
+    },
+  },
+  {
+    "2d",
+    1, (const char*[])
+    {
+      "from potion shop",
+    },
+  },
+  {
+    "kakariko village (adult)",
+    11, (const char*[])
+    {
+      "from field",
+      "from silo",
+      "from fairy's fountain",
+      "from potion shop",
+      "from twilight temple",
+      "from bazaar",
+      "from well",
+      "from cucco house",
+      "from woman's house",
+      "from skulltula house",
+      "from trail",
     },
   },
   {
@@ -397,17 +351,17 @@ struct zu_scene_info zu_scene_info[] =
     },
   },
   {
-    "carpenter's house",
+    "woman's house",
     1, (const char*[])
     {
       "from kakariko",
     },
   },
   {
-    "guy's house",
+    "guy's house (unused)",
     1, (const char*[])
     {
-      "from alley",
+      "(unused)",
     },
   },
   {
@@ -426,10 +380,10 @@ struct zu_scene_info zu_scene_info[] =
     },
   },
   {
-    "goron shop",
+    "credits",
     1, (const char*[])
     {
-      "from goron city",
+      "from end",
     },
   },
   {
@@ -443,9 +397,9 @@ struct zu_scene_info zu_scene_info[] =
     "kakariko potion shop",
     3, (const char*[])
     {
-      "from front",
-      "from front (unused)",
-      "from back"
+      "from kakariko",
+      "from kakariko (unused)",
+      "from 2d",
     },
   },
   {
@@ -459,19 +413,19 @@ struct zu_scene_info zu_scene_info[] =
     "bombchu shop",
     2, (const char*[])
     {
-      "from alley (unused)",
-      "from alley"
-    },
-  },
-  {
-    "happy mask shop",
-    1, (const char*[])
-    {
+      "from market (unused)",
       "from market",
     },
   },
   {
-    "link's house",
+    "happy mask shop (unused)",
+    1, (const char*[])
+    {
+      "(unused)",
+    },
+  },
+  {
+    "talon's house",
     2, (const char*[])
     {
       "from bed",
@@ -479,40 +433,41 @@ struct zu_scene_info zu_scene_info[] =
     },
   },
   {
-    "richard's house",
+    "richard's house (crashes)",
     1, (const char*[])
     {
-      "from alley",
+      "(crashes)",
     },
   },
   {
-    "stable",
-    1, (const char*[])
-    {
-      "from ranch",
-    },
-  },
-  {
-    "impa's house",
+    "snow path",
     2, (const char*[])
     {
-      "from front",
-      "from roof"
+      "from crystal shrine",
+      "from domain",
+    },
+  },
+  {
+    "goddess hill",
+    2, (const char*[])
+    {
+      "hillside",
+      "from warp"
     },
   },
   {
     "lakeside laboratory",
     2, (const char*[])
     {
-      "from lake",
+      "from market",
       "eyedrops timeout",
     },
   },
   {
-    "carpenter's tent",
+    "tent",
     1, (const char*[])
     {
-      "from valley",
+      "from canyon",
     },
   },
   {
@@ -524,12 +479,11 @@ struct zu_scene_info zu_scene_info[] =
   },
   {
     "fairy upgrades",
-    4, (const char*[])
+    3, (const char*[])
     {
-      "from trail",
-      "from crater",
+      "from fountain",
       "from castle",
-      "from kakariko",
+      "(unused)",
     },
   },
   {
@@ -543,73 +497,65 @@ struct zu_scene_info zu_scene_info[] =
     "fairy spells",
     3, (const char*[])
     {
-      "from fountain",
+      "from meadow",
       "from castle",
-      "from colossus",
+      "from meadow",
     },
   },
   {
-    "grottos",
-    14, (const char*[])
+    "market",
+    7, (const char*[])
     {
-      "default",
-      "skulltula",
-      "one scrub",
-      "redeads",
-      "three scrubs",
-      "webbed",
-      "octoroc",
-      "two scrubs (nut)",
-      "wolfos",
-      "bombable wall",
-      "two scrubs (potion)",
-      "tektite",
-      "stage",
-      "cow",
+      "from field",
+      "from castle",
+      "from potion shop",
+      "from bazaar",
+      "from bombchu shop",
+      "from lots 'o pots",
+      "from lakeside laboratory",
     },
   },
   {
-    "redead grave",
+    "floormaster grave",
     1, (const char*[])
     {
       "from graveyard",
     },
   },
   {
-    "shield grave",
+    "fairy's fountain (2)",
     1, (const char*[])
-    {
-      "from graveyard",
-    },
-  },
-  {
-    "royal family's tomb",
-    2, (const char*[])
-    {
-      "from graveyard",
-      "after sun's song",
-    },
-  },
-  {
-    "shooting gallery",
-    2, (const char*[])
     {
       "from kakariko",
-      "from market",
+    },
+  },
+  {
+    "flooded tomb",
+    2, (const char*[])
+    {
+      "from domain",
+      "from temple of time",
+    },
+  },
+  {
+    "shooting gallery (crashes)",
+    1, (const char*[])
+    {
+      "(crashes)",
     },
   },
   {
     "temple of time",
     8, (const char*[])
     {
-      "from outside",
+      "from flooded tomb",
       "(unused)",
       "from master sword",
-      "near stones",
-      "after sheik",
-      "after light arrow",
-      "after light arrow (unused)",
-      "from prelude",
+      "from light arrows",
+      "from pedestal",
+      "(unused)",
+      "(unused)",
+      "(unused)",
     },
   },
   {
@@ -629,11 +575,11 @@ struct zu_scene_info zu_scene_info[] =
     },
   },
   {
-    "courtyard night",
+    "courtyard night (crashes)",
     2, (const char*[])
     {
-      "from castle",
-      "from zelda",
+      "(crashes)",
+      "(crashes)",
     },
   },
   {
@@ -644,19 +590,19 @@ struct zu_scene_info zu_scene_info[] =
     },
   },
   {
-    "windmill",
+    "hall of the dead",
     3, (const char*[])
     {
+      "from shadow temple",
+      "windmill",
       "from graveyard",
-      "from kakariko",
-      "after song of storms",
     },
   },
   {
-    "fishing pond",
+    "beavers",
     1, (const char*[])
     {
-      "from lake",
+      "intro",
     },
   },
   {
@@ -668,33 +614,33 @@ struct zu_scene_info zu_scene_info[] =
     },
   },
   {
-    "bombchu bowling alley",
+    "beneath the graveyard",
     1, (const char*[])
     {
-      "from market",
+      "intro",
     },
   },
   {
-    "ranch buildings",
+    "assorted buildings",
     3, (const char*[])
     {
-      "talon's house",
-      "tower",
-      "after cucco game",
+      "cucco house",
+      "silo",
+      "cucco house (unused)",
     },
   },
   {
     "lots 'o pots",
     1, (const char*[])
     {
-      "from entrance",
+      "from market",
     },
   },
   {
-    "granny's potion shop",
+    "laundry pool",
     1, (const char*[])
     {
-      "from kakariko",
+      "intro",
     },
   },
   {
@@ -712,7 +658,7 @@ struct zu_scene_info zu_scene_info[] =
     },
   },
   {
-    "hyrule field",
+    "hyrule field (vanilla)",
     18, (const char*[])
     {
       "impa escort",
@@ -736,40 +682,33 @@ struct zu_scene_info zu_scene_info[] =
     },
   },
   {
-    "kakariko village",
-    16, (const char*[])
+    "kakariko village (child)",
+    11, (const char*[])
     {
       "from field",
-      "from trail",
-      "from graveyard",
+      "from silo",
+      "from fairy's fountain",
+      "from potion shop",
+      "from twilight temple",
       "from bazaar",
       "from well",
-      "impa's door",
-      "from carpenter's house",
-      "from granny's shop",
-      "from windmill",
-      "potion shop front",
-      "from shooting gallery",
-      "from house of skulltula",
-      "potion shop back",
-      "after nocturne",
-      "owl escort",
-      "impa's roof",
+      "from cucco house",
+      "from woman's house",
+      "from skulltula house",
+      "from trail",
     },
   },
   {
     "graveyard",
-    9, (const char*[])
+    7, (const char*[])
     {
-      "from kakariko",
-      "from shadow temple",
-      "from hut",
-      "from dampe's grave",
-      "from shield grave",
-      "from redead grave",
-      "from tomb",
-      "from nocturne",
-      "from blue warp",
+	    "from field",
+	    "from shadow temple (lower left grave)",
+	    "from hut",
+	    "from hall of the dead",
+	    "from shadow temple (middle grave)",
+	    "from floormaster grave",
+	    "from shadow temple (back grave)",
     },
   },
   {
@@ -778,153 +717,124 @@ struct zu_scene_info zu_scene_info[] =
     {
       "from field land",
       "waterfall",
-      "from domain",
+      "from refuge",
       "from field water",
-      "from woods",
+      "from sheikah crypt",
     },
   },
   {
     "kokiri forest",
-    13, (const char*[])
+    12, (const char*[])
     {
-      "medallion cutscene",
+	    "near talon's house",
       "from deku tree",
-      "from bridge",
-      "from link's house",
+      "from meadow",
+      "from talon's house",
       "from shop",
       "from brothers' house",
       "from woods",
-      "top of link's house",
+      "top of talon's house",
       "from twins' house",
       "from mido's house",
       "from saria's house",
       "after emerald",
-      "deku tree sprout",
     },
   },
   {
     "sacred forest meadow",
     4, (const char*[])
     {
-      "from woods",
-      "from temple",
-      "from minuet",
+      "from forest",
+      "from fairy's fountain",
+      "from kakariko",
       "from blue warp",
     },
   },
   {
-    "lake hylia",
-    10, (const char*[])
+    "goddess hill (title screen)",
+    2, (const char*[])
     {
-      "from field",
-      "from valley",
-      "from temple",
-      "near field",
-      "from laboratory",
-      "near pedestal",
-      "from pond",
-      "from domain",
-      "from serenade",
-      "from blue warp",
+      "(unused)",
+      "title",
     },
   },
   {
     "zora's domain",
     5, (const char*[])
     {
-      "from river",
+      "(unused)",
       "from fountain",
-      "from shop",
-      "frog timeout",
-      "from lake",
+      "from flooded tomb",
+      "waterfall",
+      "from woods",
     },
   },
   {
     "zora's fountain",
     6, (const char*[])
     {
-      "after sapphire",
-      "from jabu jabu",
+      "(unused)",
+      "from jabu",
       "from domain",
-      "from cavern",
-      "south-west corner",
+      "(unused)",
+      "(unused)",
       "from fairy's fountain",
     },
   },
   {
-    "gerudo valley",
-    5, (const char*[])
+    "gerudo refuge",
+    3, (const char*[])
     {
-      "from field",
-      "thrown out",
-      "near fortress",
-      "from fortress",
-      "from tent",
+      "from the pit",
+      "from wasteland",
+      "from river",
     },
   },
   {
     "lost woods",
     10, (const char*[])
     {
+      "(unused)",
       "from forest",
-      "from meadow",
-      "mushroom timeout",
-      "unknown",
-      "unknown",
-      "unknown",
+      "(unused)",
+      "(unused)",
+      "(unused)",
+      "from nayru's tears",
       "from goron city",
-      "from river",
-      "from field",
-      "from forest exit",
+      "from domain",
+      "from forbidden woods",
+      "from deepwood shrine",
     },
   },
   {
     "desert colossus",
-    9, (const char*[])
+    4, (const char*[])
     {
       "from wasteland",
       "from temple",
-      "right hand",
-      "left hand",
-      "after requiem",
-      "from requiem",
-      "after gauntlets",
-      "from fairy's fountain",
-      "from blue warp",
+      "from right hand",
+      "from left hand",
     },
   },
   {
-    "gerudo's fortress",
-    19, (const char*[])
+    "hyrule field",
+    6, (const char*[])
     {
-      "from valley",
-      "1-1",
-      "1-2",
-      "1-3",
-      "2-3",
-      "1-4",
-      "2-2",
-      "2-4",
-      "3-3",
-      "3-2",
-      "4-1",
-      "2-1",
-      "above prison",
-      "3-1",
-      "from training grounds",
-      "from wasteland",
-      "after archery game",
-      "captured first time",
-      "captured 2nd+ time",
+      "from river",
+      "from graveyard",
+      "from kakariko",
+      "from market",
+      "thrown out (unused)",
+      "from canyon",
     },
   },
   {
     "haunted wasteland",
     3, (const char*[])
     {
-      "from fortress",
       "from colossus",
-      "(crashes)",
+      "from refuge",
+      "from dragmire shrine",
     },
   },
   {
@@ -932,8 +842,8 @@ struct zu_scene_info zu_scene_info[] =
     5, (const char*[])
     {
       "from market",
-      "from courtyard",
-      "from fairy's fountain",
+      "from crawlspace",
+      "(unused)",
       "caught in courtyard",
       "caught outside",
     },
@@ -942,22 +852,22 @@ struct zu_scene_info zu_scene_info[] =
     "death mountain trail",
     6, (const char*[])
     {
-      "from kakariko",
+	    "from kakariko",
       "from goron city",
-      "from crater",
+      "from crater upper",
+      "from crater lower",
       "from cavern",
-      "from fairy's fountain",
-      "after ruby",
+      "from elevator",
     },
   },
   {
     "death mountain crater",
     6, (const char*[])
     {
-      "from trail",
+      "from trail upper",
+      "from trail lower",
+      "from fire temple",
       "from goron city",
-      "from temple",
-      "from fairy's fountain",
       "from bolero",
       "from blue warp",
     },
@@ -968,36 +878,26 @@ struct zu_scene_info zu_scene_info[] =
     {
       "from trail",
       "from crater",
-      "from shop",
+      "from grotto",
       "from woods",
     },
   },
   {
-    "lon lon ranch",
-    11, (const char*[])
+    "howling canyon",
+    3, (const char*[])
     {
+      "(crashes)",
+      "from tent",
       "from field",
-      "after epona's song",
-      "south gate",
-      "west gate",
-      "from talon's house",
-      "from stable",
-      "horse riding",
-      "after beating ingo",
-      "after losing to ingo",
-      "near ingo / malon",
-      "from tower",
     },
   },
   {
     "ganon's castle",
-    5, (const char*[])
+    3, (const char*[])
     {
-      "from market",
+      "from field",
       "from castle",
       "from fairy's fountain",
-      "caught in courtyard",
-      "(crashes)"
     },
   },
   {

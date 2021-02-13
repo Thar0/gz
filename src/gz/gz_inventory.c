@@ -647,11 +647,16 @@ struct menu *gz_inventory_menu(void)
     {&z64_file.dungeon_items[0].items, 0b100},
     &z64_file.dungeon_keys[0],
   };
+  // bad hack for dungeons being out of order in nimpize
+  // static int dungeon_scene_indices[17] = {
+  //   0, 35, 2, 3, 4, 5, 6, 7, 8, 30, 10, 11, 12, 13, 14, 15, 16,
+  // };
   menu_add_static(&quest, 0, 7, "dungeon", 0xC0C0C0);
   {
     char options[1024];
     char *p = options;
     for (int i = 0; i < 17; ++i) {
+      // int idx = dungeon_scene_indices[i];
       size_t l = strlen(zu_scene_info[i].scene_name) + 1;
       memcpy(p, zu_scene_info[i].scene_name, l);
       p += l;

@@ -43,6 +43,9 @@ Line microcode ROMs:
 -   Hey You, Pikachu! (USA)
 -   Hey You, Pikachu! (JPN)
 
+Ocarina of Time ROM Hacks:
+-   Nimpize Adventure (N64 and Wii VC)
+
 ## Using the patcher GUI
 Start the gz-gui program. Click the tab that corresponds to the type of file
 you want to create and fill out the options according to the instructions

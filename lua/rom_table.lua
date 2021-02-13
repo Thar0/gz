@@ -124,6 +124,18 @@ rom_table =
                     gz_name     = "gz-oot-ce-j" .. version_suffix,
                     title_id    = "NGEJ",
                   },
+
+  [0x123CDFA1]  = {
+                    game        = "oot",
+                    version     = "npze",
+                    region      = "u",
+                    code_ind    = 27,
+                    code_ram    = 0x800110A0,
+                    data_dir    = "oot-npze-u",
+                    gz_version  = "oot-npze-u" .. version_suffix,
+                    gz_name     = "gz-oot-npze-u" .. version_suffix,
+                    title_id    = "NGEJ",
+                  },
 }
 
 vc_table =

@@ -36,7 +36,7 @@ local patched_rom = fs:assemble_rom()
 
 print("building ldr")
 local gz = gru.blob_load("bin/gz/" .. gz_version .. "/gz.bin")
-local payload_rom = fs:prom_tail()
+local payload_rom = 0x1FD58E0 --fs:prom_tail()
 local payload_ram = 0x80400060 - 0x60
 local payload_size = gz:size() + 0x60
 local _,_,make_result = os.execute(string.format(make .. " clean-ldr && " ..
