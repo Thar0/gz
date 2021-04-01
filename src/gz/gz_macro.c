@@ -150,7 +150,6 @@ int do_import_macro(const char *path, void *data)
       err_str = s_eof;
       goto f_err;
     }
-    sys_io_mode(SYS_IO_DMA);
     n = gz.movie_input.element_size * n_input;
     if (read(f, gz.movie_input.begin, n) != n) {
       err_str = s_eof;
@@ -223,7 +222,6 @@ int do_import_macro(const char *path, void *data)
     }
     strcpy(gz.last_path_imported, path);
 f_err:
-    sys_io_mode(SYS_IO_PIO);
     if (errno != 0)
       err_str = strerror(errno);
   }
@@ -377,7 +375,6 @@ static int do_import_state(const char *path, void *data)
       err_str = s_memory;
       goto error;
     }
-    sys_io_mode(SYS_IO_DMA);
     if (read(f, state, st.st_size) != st.st_size)
       err_str = strerror(errno);
     else if (state->z64_version != Z64_VERSION ||
@@ -389,7 +386,6 @@ static int do_import_state(const char *path, void *data)
       err_str = s_invalid;
     else
       state = NULL;
-    sys_io_mode(SYS_IO_PIO);
   }
   else
     err_str = strerror(errno);
