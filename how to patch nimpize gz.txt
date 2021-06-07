@@ -1,0 +1,21 @@
+Patching nimpize steps:
+
+Rom:
+ - Have a nimpize rom and a clean 1.0 rom
+ - Copy the nimpize rom for later (will be referred to as original nimpize)
+ - Copy 0x5F60 bytes from 0x7430 in 1.0 to 0x7430 in nimpize
+ - Copy the range 0x7430 to 0x75F0 in original nimpize to 0x7430 in nimpize
+ - Patch this new rom with gz (make-rom)
+ - Copy 0x5F60 bytes from 0x7430 in the original nimpize rom to 0x7430 bytes in the gz rom
+ - Re-Calculate the rom crc
+
+Wad:
+ - Have a nimpize rom and a clean 1.0 rom
+ - Copy the nimpize rom for later (will be referred to as original nimpize)
+ - Copy 0x5F60 bytes from 0x7430 in 1.0 to 0x7430 in nimpize
+ - Copy the range 0x7430 to 0x75F0 in original nimpize to 0x7430 in nimpize
+ - Patch this new rom with gz (make-wad)
+ - Use gzinject to unpack the wad and locate the rom
+ - Copy 0x5F60 bytes from 0x7430 in the original nimpize rom to 0x7430 bytes in the gz rom
+ - Re-Calculate the rom crc
+ - Use gzinject to re-pack the wad
