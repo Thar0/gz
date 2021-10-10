@@ -124,6 +124,17 @@ rom_table =
                     gz_name     = "gz-oot-ce-j" .. version_suffix,
                     title_id    = "NGEJ",
                   },
+  [0xC905A1DE]  = {
+                    game        = "oot",
+                    version     = "mot",
+                    region      = "u",
+                    code_ind    = 27,
+                    code_ram    = 0x800110A0,
+                    data_dir    = "oot-mot-u",
+                    gz_version  = "oot-mot-u" .. version_suffix,
+                    gz_name     = "gz-oot-mot-u" .. version_suffix,
+                    title_id    = "NGME",
+                  },
 }
 
 vc_table =
