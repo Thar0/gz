@@ -635,6 +635,13 @@ static void angle_invert_proc(struct menu_item *item, void *data)
   gz.angle_desired = gz.angle_desired + 0x8000;
 }
 
+static void angle_match_player_proc(struct menu_item *item, void *data)
+{
+  z64_actor_t *player_actor = z64_game.actor_list[2].first;
+  if (player_actor != NULL)
+    gz.angle_desired = player_actor->rot_2.y;
+}
+
 static void angle_left_proc(struct menu_item *item, void *data)
 {
   gz.angle_desired = gz.angle_desired + 0x4000;
@@ -965,6 +972,7 @@ struct menu *gz_macro_menu(void)
   menu_add_intinput(&menu_tools, 11, 2, 16, 4,
                   angle_desired_proc, NULL);
   menu_add_button(&menu_tools, 16, 2, "invert", angle_invert_proc, NULL);
+  menu_add_button(&menu_tools, 24, 2, "player", angle_match_player_proc, NULL);
   menu_add_button(&menu_tools, 11, 3, "left", angle_left_proc, NULL);
   menu_add_button(&menu_tools, 16, 3, "right", angle_right_proc, NULL);
   menu_add_static(&menu_tools, 2, 5, "closest", 0xC0C0C0);

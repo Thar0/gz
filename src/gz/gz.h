@@ -173,8 +173,8 @@ struct gz
   uint32_t              disp_hook_p[4];
   uint32_t              disp_hook_d[4];
   _Bool                 angle_enable;
-  uint16_t              angle_desired;
-  uint16_t              angle_best_matching;
+  z64_angle_t           angle_desired;
+  z64_angle_t           angle_best_matching;
   int16_t               angle_x;
   int16_t               angle_y;
   _Bool                 angle_use_min;
