@@ -220,6 +220,19 @@ int do_import_macro(const char *path, void *data)
       vector_shrink_to_fit(&gz.movie_oca_sync);
       vector_shrink_to_fit(&gz.movie_room_load);
     }
+    /* read rerecords info if it exists */
+    if (lseek(f, 0, SEEK_CUR) < st.st_size) {
+      n = sizeof(gz.movie_rerecords);
+      if (read(f, &gz.movie_rerecords, n) != n) {
+        err_str = s_eof;
+        goto f_err;
+      }
+      n = sizeof(gz.movie_last_recorded_frame);
+      if (read(f, &gz.movie_last_recorded_frame, n) != n) {
+        err_str = s_eof;
+        goto f_err;
+      }
+    }
     strcpy(gz.last_path_imported, path);
 f_err:
     if (errno != 0)
@@ -265,27 +278,32 @@ static int do_export_macro(const char *path, void *data)
     size_t n_oca_input = gz.movie_oca_input.size;
     size_t n_oca_sync = gz.movie_oca_sync.size;
     size_t n_room_load = gz.movie_room_load.size;
-    /* write sync info if there is any */
-    if (n_oca_input != 0 || n_oca_sync != 0 || n_room_load != 0) {
-      n = sizeof(n_oca_input);
-      if (write(f, &n_oca_input, n) != n)
-        goto f_err;
-      n = sizeof(n_oca_sync);
-      if (write(f, &n_oca_sync, n) != n)
-        goto f_err;
-      n = sizeof(n_room_load);
-      if (write(f, &n_room_load, n) != n)
-        goto f_err;
-      n = gz.movie_oca_input.element_size * n_oca_input;
-      if (write(f, gz.movie_oca_input.begin, n) != n)
-        goto f_err;
-      n = gz.movie_oca_sync.element_size * n_oca_sync;
-      if (write(f, gz.movie_oca_sync.begin, n) != n)
-        goto f_err;
-      n = gz.movie_room_load.element_size * n_room_load;
-      if (write(f, gz.movie_room_load.begin, n) != n)
-        goto f_err;
-    }
+    /* write sync info */
+    n = sizeof(n_oca_input);
+    if (write(f, &n_oca_input, n) != n)
+      goto f_err;
+    n = sizeof(n_oca_sync);
+    if (write(f, &n_oca_sync, n) != n)
+      goto f_err;
+    n = sizeof(n_room_load);
+    if (write(f, &n_room_load, n) != n)
+      goto f_err;
+    n = gz.movie_oca_input.element_size * n_oca_input;
+    if (write(f, gz.movie_oca_input.begin, n) != n)
+      goto f_err;
+    n = gz.movie_oca_sync.element_size * n_oca_sync;
+    if (write(f, gz.movie_oca_sync.begin, n) != n)
+      goto f_err;
+    n = gz.movie_room_load.element_size * n_room_load;
+    if (write(f, gz.movie_room_load.begin, n) != n)
+      goto f_err;
+    /* write rerecords info */
+    n = sizeof(gz.movie_rerecords);
+    if (write(f, &gz.movie_rerecords, n) != n)
+      goto f_err;
+    n = sizeof(gz.movie_last_recorded_frame);
+    if (write(f, &gz.movie_last_recorded_frame, n) != n)
+      goto f_err;
 f_err:
     if (errno != 0)
       err_str = strerror(errno);
@@ -378,7 +396,7 @@ static int do_import_state(const char *path, void *data)
     if (read(f, state, st.st_size) != st.st_size)
       err_str = strerror(errno);
     else if (state->z64_version != Z64_VERSION ||
-             state->state_version != SETTINGS_STATE_VERSION)
+             state->state_version < SETTINGS_STATE_MIN_VER)
     {
       err_str = s_version;
     }
@@ -443,7 +461,7 @@ static void export_state_proc(struct menu_item *item, void *data)
     char defname[32];
     snprintf(defname, sizeof(defname), "000-%s",
              zu_scene_info[state->scene_idx].scene_name);
-    menu_get_file(gz.menu_main, GETFILE_SAVE, defname, ".gzs",
+    menu_get_file(gz.menu_main, GETFILE_SAVE_PREFIX_INC, defname, ".gzs",
                   do_export_state, NULL);
   }
 }
@@ -672,6 +690,21 @@ static int vcont_button_proc(struct menu_item *item,
   return 0;
 }
 
+static int byte_ztarget_proc(struct menu_item *item,
+                            enum menu_callback_reason reason,
+                            void *data)
+{
+  if (reason == MENU_CALLBACK_SWITCH_ON)
+    settings->bits.ignore_target = 1;
+  else if (reason == MENU_CALLBACK_SWITCH_OFF)
+    settings->bits.ignore_target = 0;
+  else if (reason == MENU_CALLBACK_THINK) {
+    if (menu_checkbox_get(item) != settings->bits.ignore_target)
+      menu_checkbox_set(item, settings->bits.ignore_target);
+  }
+  return 0;
+}
+
 struct menu *gz_macro_menu(void)
 {
   static struct menu menu;
@@ -755,10 +788,14 @@ struct menu *gz_macro_menu(void)
   item = menu_add_button_icon(&menu, 3, 13, t_movie, 1, 0xFFFFFF,
                               quick_play_proc, NULL);
   item->tooltip = "quick play movie";
+  /* display rerecord count */
+  menu_add_static(&menu, 0, 15, "rerecords:", 0xC0C0C0);
+  menu_add_watch(&menu, 11, 15, (uint32_t)&gz.movie_rerecords,
+                 WATCH_TYPE_U32);
   /* create settings controls */
-  menu_add_submenu(&menu, 0, 15, &menu_settings, "settings");
+  menu_add_submenu(&menu, 0, 16, &menu_settings, "settings");
   /* create virtual controller controls */
-  menu_add_submenu(&menu, 0, 16, &menu_vcont, "virtual controller");
+  menu_add_submenu(&menu, 0, 17, &menu_vcont, "virtual controller");
   /* create tooltip */
   menu_add_tooltip(&menu, 8, 0, gz.menu_main, 0xC0C0C0);
 
@@ -778,6 +815,8 @@ struct menu *gz_macro_menu(void)
   menu_add_static(&menu_settings, 0, 7, "movie settings", 0xC0C0C0);
   menu_add_checkbox(&menu_settings, 2, 8, multi_part_proc, NULL);
   menu_add_static(&menu_settings, 4, 8, "multi part", 0xC0C0C0);
+  menu_add_checkbox(&menu_settings, 2, 9, byte_ztarget_proc, NULL);
+  menu_add_static(&menu_settings, 4, 9, "ignore state's z-target", 0xC0C0C0);
 
   /* populate virtual pad menu */
   menu_vcont.selector = menu_add_submenu(&menu_vcont, 0, 0, NULL, "return");

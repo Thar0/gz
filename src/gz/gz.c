@@ -164,7 +164,7 @@ static void main_hook(void)
   if (settings->cheats & (1 << CHEAT_ISG))
     z64_link.sword_state = 1;
   if (settings->cheats & (1 << CHEAT_QUICKTEXT))
-    *(uint8_t*)(&z64_message_state[0x000C]) = 0x01;
+    *(uint8_t *)(&z64_message_state[0x000C]) = 0x01;
   if (settings->cheats & (1 << CHEAT_NOHUD))
       z64_file.hud_flag = 0x001;
 
@@ -258,15 +258,23 @@ static void main_hook(void)
     int d_x;
     int d_y;
     uint16_t d_pad;
+    uint16_t d_pressed;
+    uint16_t d_released;
     if (gz.movie_state == MOVIE_PLAYING &&
         gz.movie_frame < gz.movie_input.size)
     {
       z64_input_t zi;
-      movie_to_z(gz.movie_frame, &zi, NULL);
+      _Bool reset_flag;
+      movie_to_z(gz.movie_frame, &zi, &reset_flag);
       d_x = zi.raw.x;
       d_y = zi.raw.y;
       d_pad = zi.raw.pad;
-      d_pad |= zi.pad_pressed;
+      d_pressed = zi.pad_pressed;
+      d_released = zi.pad_released;
+      if (!settings->bits.input_pressrel)
+        d_pad |= d_pressed;
+      if (reset_flag)
+        d_pad |= 0x0080;
       if (settings->bits.macro_input) {
         if (abs(d_x) < 8)
           d_x = input_x();
@@ -274,16 +282,26 @@ static void main_hook(void)
           d_y = input_y();
         d_pad |= input_pad();
       }
-      d_pad &= ~BUTTON_L;
-      d_pad &= ~BUTTON_D_UP;
-      d_pad &= ~BUTTON_D_DOWN;
-      d_pad &= ~BUTTON_D_LEFT;
-      d_pad &= ~BUTTON_D_RIGHT;
+      uint16_t mask = BUTTON_L | BUTTON_D_UP | BUTTON_D_DOWN | BUTTON_D_LEFT |
+                      BUTTON_D_RIGHT;
+      d_pad &= ~mask;
+      d_pressed &= ~mask;
+      d_released &= ~mask;
     }
     else {
       d_x = input_x();
       d_y = input_y();
       d_pad = input_pad();
+      if (gz.frames_queued == 0) {
+        d_pressed = z64_input_direct.pad_pressed;
+        d_released = z64_input_direct.pad_released;
+      }
+      else {
+        d_pressed = input_pressed_raw();
+        d_released = input_released();
+      }
+      if (gz.reset_flag)
+        d_pad |= 0x0080;
     }
     struct gfx_texture *texture = resource_get(RES_ICON_BUTTONS);
     gfx_mode_set(GFX_MODE_COLOR, GPACK_RGBA8888(0xC0, 0xC0, 0xC0, alpha));
@@ -291,11 +309,18 @@ static void main_hook(void)
                "%4i %4i", d_x, d_y);
     static const int buttons[] =
     {
-      15, 14, 12, 3, 2, 1, 0, 13, 5, 4, 11, 10, 9, 8,
+      15, 14, 12, 3, 2, 1, 0, 13, 5, 4, 11, 10, 9, 8, 7,
     };
     for (int i = 0; i < sizeof(buttons) / sizeof(*buttons); ++i) {
       int b = buttons[i];
-      if (!(d_pad & (1 << b)))
+      int bit = 1 << b;
+      int b_alpha;
+      if (settings->bits.input_pressrel &&
+          ((d_pressed | d_released) & ~d_pad & bit))
+        b_alpha = 0x7F;
+      else if (d_pad & bit)
+        b_alpha = 0xFF;
+      else
         continue;
       int x = (cw - texture->tile_width) / 2 + i * 10;
       int y = -(gfx_font_xheight(font) + texture->tile_height + 1) / 2;
@@ -306,8 +331,24 @@ static void main_hook(void)
         1.f, 1.f,
       };
       gfx_mode_set(GFX_MODE_COLOR, GPACK_RGB24A8(input_button_color[b],
-                                                 alpha));
+                                                 b_alpha * alpha / 0xFF));
       gfx_sprite_draw(&sprite);
+      if (settings->bits.input_pressrel && (d_pressed & bit)) {
+        struct gfx_sprite arrow_sprite =
+        {
+          texture, 16, sprite.x - 1, sprite.y - 1, 1.f, 1.f,
+        };
+        gfx_mode_set(GFX_MODE_COLOR, GPACK_RGB24A8(0x00C000, alpha));
+        gfx_sprite_draw(&arrow_sprite);
+      }
+      if (settings->bits.input_pressrel && (d_released & bit)) {
+        struct gfx_sprite arrow_sprite =
+        {
+          texture, 16, sprite.x + 9, sprite.y + 9, -1.f, -1.f,
+        };
+        gfx_mode_set(GFX_MODE_COLOR, GPACK_RGB24A8(0xC00000, alpha));
+        gfx_sprite_draw(&arrow_sprite);
+      }
     }
   }
 
@@ -358,6 +399,7 @@ static void main_hook(void)
   gz_col_view();
   gz_hit_view();
   gz_cull_view();
+  gz_path_view();
 
   /* execute free camera in view mode */
   gz_free_view();
@@ -566,12 +608,22 @@ HOOK void input_hook(void)
         }
     }
     if (gz.movie_state == MOVIE_RECORDING) {
+      /* clear rerecords for empty movies */
+      if (gz.movie_frame == 0 && gz.movie_input.size == 0) {
+        gz.movie_last_recorded_frame = -1;
+        gz.movie_rerecords = 0;
+      }
       if (gz.movie_frame >= gz.movie_input.size) {
         if (gz.movie_input.size == gz.movie_input.capacity)
           vector_reserve(&gz.movie_input, 128);
         vector_push_back(&gz.movie_input, 1, NULL);
       }
-      z_to_movie(gz.movie_frame++, &zi[0], gz.reset_flag);
+      /* if the last recorded frame is not the previous frame,
+         increment the rerecord count */
+      if (gz.movie_last_recorded_frame >= gz.movie_frame)
+        ++gz.movie_rerecords;
+      gz.movie_last_recorded_frame = gz.movie_frame++;
+      z_to_movie(gz.movie_last_recorded_frame, &zi[0], gz.reset_flag);
     }
     else if (gz.movie_state == MOVIE_PLAYING) {
       if (gz.movie_frame >= gz.movie_input.size) {
@@ -623,8 +675,8 @@ HOOK void disp_hook(z64_disp_buf_t *disp_buf, Gfx *buf, uint32_t size)
     for (int i = 0; i < 4; ++i) {
       if (disp_buf == z_disp[i]) {
         gz.disp_hook_size[i] = disp_buf->size;
-        gz.disp_hook_p[i] = (char*)disp_buf->p - (char*)disp_buf->buf;
-        gz.disp_hook_d[i] = (char*)disp_buf->d - (char*)disp_buf->buf;
+        gz.disp_hook_p[i] = (char *)disp_buf->p - (char *)disp_buf->buf;
+        gz.disp_hook_d[i] = (char *)disp_buf->d - (char *)disp_buf->buf;
         break;
       }
     }
@@ -632,7 +684,7 @@ HOOK void disp_hook(z64_disp_buf_t *disp_buf, Gfx *buf, uint32_t size)
   disp_buf->size = size;
   disp_buf->buf = buf;
   disp_buf->p = buf;
-  disp_buf->d = (void*)((char*)buf + size);
+  disp_buf->d = (void *)((char *)buf + size);
 }
 
 static void state_main_hook(void)
@@ -676,12 +728,12 @@ static void state_main_hook(void)
     if (z64_ctxt.state_frames != 0) {
       /* copy gfx buffer from previous frame */
       if (gfx->frame_count_1 & 1) {
-        memcpy((void*)(&z64_disp[z64_disp_size]),
-               (void*)(&z64_disp[0]), z64_disp_size);
+        memcpy((void *)&z64_disp[z64_disp_size],
+               (void *)&z64_disp[0], z64_disp_size);
       }
       else {
-        memcpy((void*)(&z64_disp[0]),
-               (void*)(&z64_disp[z64_disp_size]), z64_disp_size);
+        memcpy((void *)&z64_disp[0],
+               (void *)&z64_disp[z64_disp_size], z64_disp_size);
       }
       /* set pointers */
       zu_load_disp_p(&gz.z_disp_p);
@@ -753,6 +805,8 @@ HOOK void srand_hook(uint32_t seed)
           z64_random = ms->new_seed;
           return;
         }
+        else
+          gz_log("rng desync detected");
       }
 #endif
     }
@@ -940,9 +994,10 @@ HOOK void guPerspectiveF_hook(MtxF *mf)
   maybe_init_gp();
   if (gz.ready && settings->bits.wiivc_cam) {
     /* overwrite the scale argument in guPerspectiveF */
+    /* this assumes that mf is at 0($sp) on entry, which should be true */
     __asm__ ("la      $t0, 0x3F800000;"
-             "sw      $t0, 0x0048($sp);"
-             ::: "t0");
+             "sw      $t0, 0x0048 + %0;"
+             :: "R"(mf) : "t0");
   }
   mf->xx = 1.f;
   mf->xy = 0.f;
@@ -973,8 +1028,8 @@ HOOK void camera_hook(void *camera)
 
   gz_update_cam();
 
-  z64_xyzf_t *camera_at = (void*)((char*)camera + 0x0050);
-  z64_xyzf_t *camera_eye = (void*)((char*)camera + 0x005C);
+  z64_xyzf_t *camera_at = (void *)((char *)camera + 0x0050);
+  z64_xyzf_t *camera_eye = (void *)((char *)camera + 0x005C);
 
   *camera_eye = gz.cam_pos;
 
@@ -1017,7 +1072,7 @@ static void init(void)
   gz.movie_oca_input_pos = 0;
   gz.movie_oca_sync_pos = 0;
   gz.movie_room_load_pos = 0;
-  gz.z_input_mask.pad = 0;
+  gz.z_input_mask.pad = BUTTON_L;
   gz.z_input_mask.x = 0;
   gz.z_input_mask.y = 0;
   for (int i = 0; i < 4; ++i) {
@@ -1034,6 +1089,8 @@ static void init(void)
   gz.col_view_state = COLVIEW_INACTIVE;
   gz.hit_view_state = HITVIEW_INACTIVE;
   gz.cull_view_state = CULLVIEW_INACTIVE;
+  gz.path_view_state = PATHVIEW_INACTIVE;
+  gz.noclip_on = 0;
   gz.hide_rooms = 0;
   gz.hide_actors = 0;
   gz.free_cam = 0;
@@ -1047,10 +1104,6 @@ static void init(void)
   gz.cam_pos.x = 0.f;
   gz.cam_pos.y = 0.f;
   gz.cam_pos.z = 0.f;
-  gz.memfile = malloc(sizeof(*gz.memfile) * SETTINGS_MEMFILE_MAX);
-  for (int i = 0; i < SETTINGS_MEMFILE_MAX; ++i)
-    gz.memfile_saved[i] = 0;
-  gz.memfile_slot = 0;
   for (int i = 0; i < SETTINGS_STATE_MAX; ++i)
     gz.state_buf[i] = NULL;
   gz.state_slot = 0;
@@ -1084,6 +1137,7 @@ static void init(void)
     menu_init(&global, MENU_NOVALUE, MENU_NOVALUE, MENU_NOVALUE);
     gz.menu_main = &menu;
     gz.menu_global = &global;
+    gz.menu_watches = &watches;
 
     /* populate top menu */
     menu.selector = menu_add_button(&menu, 0, 0, "return",
