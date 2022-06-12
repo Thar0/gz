@@ -471,7 +471,8 @@ static void main_hook(void)
   }
 
   gfx_mode_set(GFX_MODE_COLOR, GPACK_RGBA8888(0xC0, 0xC0, 0xC0, alpha));
-  gfx_printf(font, 20, Z64_SCREEN_HEIGHT - 10, "%s", gz.last_path_imported);
+  if (gz.last_path_imported != NULL)
+    gfx_printf(font, 20, Z64_SCREEN_HEIGHT - 10, "%s", gz.last_path_imported);
 
   /* finish frame */
   gfx_flush();
@@ -607,35 +608,62 @@ HOOK void input_hook(void)
           gz_vcont_get(i, &zi[i]);
         }
     }
-    if (gz.movie_state == MOVIE_RECORDING) {
-      /* clear rerecords for empty movies */
-      if (gz.movie_frame == 0 && gz.movie_input.size == 0) {
-        gz.movie_last_recorded_frame = -1;
-        gz.movie_rerecords = 0;
-      }
-      if (gz.movie_frame >= gz.movie_input.size) {
-        if (gz.movie_input.size == gz.movie_input.capacity)
-          vector_reserve(&gz.movie_input, 128);
-        vector_push_back(&gz.movie_input, 1, NULL);
-      }
-      /* if the last recorded frame is not the previous frame,
-         increment the rerecord count */
-      if (gz.movie_last_recorded_frame >= gz.movie_frame)
-        ++gz.movie_rerecords;
-      gz.movie_last_recorded_frame = gz.movie_frame++;
-      z_to_movie(gz.movie_last_recorded_frame, &zi[0], gz.reset_flag);
-    }
-    else if (gz.movie_state == MOVIE_PLAYING) {
-      if (gz.movie_frame >= gz.movie_input.size) {
-        if (input_bind_held(COMMAND_PLAYMACRO) && gz.movie_input.size > 0)
-          gz_movie_rewind();
-        else if (settings->bits.multi_part_movie && gz.last_path_imported[0] != 0) {
-          if (do_import_macro(gz.last_path_imported, NULL)) // TODO change the path to the next part
-            gz.movie_state = MOVIE_IDLE;
-        } else
-          gz.movie_state = MOVIE_IDLE;
-      }
-      if (gz.movie_state == MOVIE_PLAYING) {
+
+    switch (gz.movie_state) {
+      case MOVIE_IDLE:
+        break;
+      case MOVIE_RECORDING:
+        /* clear rerecords and last imported path for empty movies */
+        if (gz.movie_frame == 0 && gz.movie_input.size == 0) {
+          if (gz.last_path_imported != NULL)
+            free(gz.last_path_imported);
+          gz.last_path_imported = NULL;
+          gz.movie_last_recorded_frame = -1;
+          gz.movie_rerecords = 0;
+        }
+        /* allocate more space for inputs */
+        if (gz.movie_frame >= gz.movie_input.size) {
+          if (gz.movie_input.size == gz.movie_input.capacity)
+            vector_reserve(&gz.movie_input, 128);
+          vector_push_back(&gz.movie_input, 1, NULL);
+        }
+        /* if the last recorded frame is not the previous frame,
+           increment the rerecord count */
+        if (gz.movie_last_recorded_frame >= gz.movie_frame)
+          ++gz.movie_rerecords;
+        gz.movie_last_recorded_frame = gz.movie_frame++;
+        z_to_movie(gz.movie_last_recorded_frame, &zi[0], gz.reset_flag);
+        break;
+      case MOVIE_PLAYING:
+        /* check if there is anything more to play */
+        if (gz.movie_frame >= gz.movie_input.size) {
+          if (input_bind_held(COMMAND_PLAYMACRO) && gz.movie_input.size > 0)
+            gz_movie_rewind();
+          else {
+            /* no more inputs */
+            char *next_part;
+            int ret = -1;
+
+            if (!settings->bits.multi_part_movie
+                 || gz.last_path_imported == NULL) {
+              /* single part macro or not imported from SD card, we're done */
+              gz.movie_state = MOVIE_IDLE;
+              break;
+            }
+            /* try to load more inputs from sd card */
+            next_part = macro_get_next_part(gz.last_path_imported);
+            if (next_part != NULL){
+              ret = macro_import(next_part);
+              free(next_part);
+            }
+            if (ret != 0) {
+              /* could not get next part, we're done */
+              gz.movie_state = MOVIE_IDLE;
+              break;
+            }
+          }
+        }
+        /* put next movie inputs */
         _Bool reset;
         movie_to_z(gz.movie_frame++, &zi[0], &reset);
         if (settings->bits.macro_input) {
@@ -656,7 +684,7 @@ HOOK void input_hook(void)
         }
         else
           gz.reset_flag = reset;
-      }
+        break;
     }
   }
 }
@@ -1108,8 +1136,7 @@ static void init(void)
     gz.state_buf[i] = NULL;
   gz.state_slot = 0;
   gz.reset_flag = 0;
-
-  memset(gz.last_path_imported, 0, sizeof(gz.last_path_imported));
+  gz.last_path_imported = NULL;
 
   /* initialize io device */
   io_init();

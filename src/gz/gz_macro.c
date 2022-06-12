@@ -15,6 +15,89 @@
 static _Bool            vcont_plugged[4];
 static z64_controller_t vcont_raw[4];
 
+static int macro_decompose_name(const char *path, char **name,
+                                size_t *n_digits)
+{
+  char *file_num = NULL;
+  char *file_ext = NULL;
+  char *path_cpy = strdup (path);
+  size_t i = strlen (path);
+  int num;
+
+  /* multi-part movies are named as <name>.<part number>.gzm */
+
+  /* split on ., stop at path separator */
+  while (i --> 0 && file_num == NULL) {
+    if (path_cpy[i] == '/')
+      break;
+    if (path_cpy[i] == '.') {
+      if (file_ext == NULL)
+        file_ext = &path_cpy[i + 1];
+      else
+        file_num = &path_cpy[i + 1];
+
+      path_cpy[i] = '\0';
+    }
+  }
+
+  /* if extension is correct and a number string was found, return them */
+  if (strcmp(file_ext, "gzm") == 0 && file_num != NULL) {
+    num = atoi (file_num);
+    if (num != 0) {
+      *n_digits = strlen (file_num);
+      *name = strdup (path_cpy);
+    }
+  }
+  else {
+    num = 0;
+    *n_digits = 0;
+    *name = NULL;
+  }
+
+  free(path_cpy);
+  return num;
+}
+
+char *macro_get_first_part(const char *cur_part)
+{
+  size_t n_digits;
+  char *name;
+  int num;
+  char *new_path;
+
+  /* try and get name parts */
+  num = macro_decompose_name(cur_part, &name, &n_digits);
+  if (num == 0)
+    return NULL;
+
+  /* build first part path */
+  new_path = malloc(strlen(name) + 1 + 1 + 1 + 3 + 1);
+  sprintf(new_path, "%s.1.gzm", name);
+  return new_path;
+}
+
+char *macro_get_next_part(const char *cur_part)
+{
+  size_t n_digits;
+  char *name;
+  int num;;
+  char *new_path;
+
+  /* try and get name parts */
+  num = macro_decompose_name(cur_part, &name, &n_digits);
+  if (num == 0)
+    return NULL;
+
+  /* need room for one more digit after incrementing */
+  if (num % 10 == 9)
+    ++n_digits;
+
+  /* build next part path */
+  new_path = malloc(strlen(name) + 1 + n_digits + 1 + 3 + 1);
+  sprintf(new_path, "%s.%i.gzm", name, ++num);
+  return new_path;
+}
+
 static int pause_switch_proc(struct menu_item *item,
                              enum menu_callback_reason reason,
                              void *data)
@@ -109,7 +192,7 @@ static int movie_pos_proc(struct menu_item *item,
   return 0;
 }
 
-int do_import_macro(const char *path, void *data)
+static int do_import_macro(const char *path, void *data)
 {
   const char *s_eof = "unexpected end of file";
   const char *s_memory = "out of memory";
@@ -233,7 +316,9 @@ int do_import_macro(const char *path, void *data)
         goto f_err;
       }
     }
-    strcpy(gz.last_path_imported, path);
+    if (gz.last_path_imported != NULL)
+      free(gz.last_path_imported);
+    gz.last_path_imported = strdup(path);
 f_err:
     if (errno != 0)
       err_str = strerror(errno);
@@ -249,6 +334,11 @@ error:
   }
   else
     return 0;
+}
+
+int macro_import(const char *path)
+{
+  return do_import_macro(path, NULL);
 }
 
 static int do_export_macro(const char *path, void *data)
@@ -534,6 +624,14 @@ static void quick_play_proc(struct menu_item *item, void *data)
   else if (!state || state->movie_frame != 0 || gz.movie_input.size == 0)
     gz_log("no movie recorded");
   else {
+    if (settings->bits.multi_part_movie && gz.last_path_imported != NULL) {
+      /* for multi-part movies, reload first part if it exists */
+      char *first = macro_get_first_part(gz.last_path_imported);
+      if (first != NULL) {
+        macro_import(first);
+        free(first);
+      }
+    }
     gz_movie_rewind();
     gz.movie_state = MOVIE_PLAYING;
     int slot = gz.state_slot;
@@ -604,8 +702,8 @@ static int wiivc_cam_proc(struct menu_item *item,
 }
 
 static int multi_part_proc(struct menu_item *item,
-                          enum menu_callback_reason reason,
-                          void *data)
+                           enum menu_callback_reason reason,
+                           void *data)
 {
   if (reason == MENU_CALLBACK_SWITCH_ON)
     settings->bits.multi_part_movie = 1;
@@ -812,11 +910,11 @@ struct menu *gz_macro_menu(void)
   menu_add_static(&menu_settings, 0, 5, "game settings", 0xC0C0C0);
   menu_add_checkbox(&menu_settings, 2, 6, wiivc_cam_proc, NULL);
   menu_add_static(&menu_settings, 4, 6, "wii vc camera", 0xC0C0C0);
-  menu_add_static(&menu_settings, 0, 7, "movie settings", 0xC0C0C0);
-  menu_add_checkbox(&menu_settings, 2, 8, multi_part_proc, NULL);
-  menu_add_static(&menu_settings, 4, 8, "multi part", 0xC0C0C0);
-  menu_add_checkbox(&menu_settings, 2, 9, byte_ztarget_proc, NULL);
-  menu_add_static(&menu_settings, 4, 9, "ignore state's z-target", 0xC0C0C0);
+  menu_add_checkbox(&menu_settings, 2, 7, byte_ztarget_proc, NULL);
+  menu_add_static(&menu_settings, 4, 7, "ignore state's z-target", 0xC0C0C0);
+  menu_add_static(&menu_settings, 0, 8, "movie settings", 0xC0C0C0);
+  menu_add_checkbox(&menu_settings, 2, 9, multi_part_proc, NULL);
+  menu_add_static(&menu_settings, 4, 9, "multi part", 0xC0C0C0);
 
   /* populate virtual pad menu */
   menu_vcont.selector = menu_add_submenu(&menu_vcont, 0, 0, NULL, "return");
