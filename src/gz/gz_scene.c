@@ -133,6 +133,27 @@ static int holl_view_all_proc(struct menu_item *item,
   return 0;
 }
 
+static int diving_game_view_proc(struct menu_item *item,
+                                 enum menu_callback_reason reason,
+                                 void *data)
+{
+  if (reason == MENU_CALLBACK_SWITCH_ON) {
+    if (gz.diving_game_view_state == DIVING_GAME_VIEW_INACTIVE)
+      gz.diving_game_view_state = DIVING_GAME_VIEW_START;
+  }
+  else if (reason == MENU_CALLBACK_SWITCH_OFF) {
+    if (gz.diving_game_view_state != DIVING_GAME_VIEW_INACTIVE)
+      gz.diving_game_view_state = DIVING_GAME_VIEW_STOP;
+  }
+  else if (reason == MENU_CALLBACK_THINK) {
+    _Bool state = gz.diving_game_view_state == DIVING_GAME_VIEW_START ||
+                  gz.diving_game_view_state == DIVING_GAME_VIEW_ACTIVE;
+    if (menu_checkbox_get(item) != state)
+      menu_checkbox_set(item, state);
+  }
+  return 0;
+}
+
 static int guard_view_proc(struct menu_item *item,
                          enum menu_callback_reason reason,
                          void *data)
@@ -658,6 +679,9 @@ struct menu *gz_scene_menu(void)
   /* guard vision control */
   menu_add_static(&visuals, 0, 10, "show guards view", 0xC0C0C0);
   menu_add_checkbox(&visuals, 18, 10, guard_view_proc, NULL);
+  /* diving game view controls */
+  menu_add_static(&visuals, 0, 11, "diving game view", 0xC0C0C0);
+  menu_add_checkbox(&visuals, 18, 11, diving_game_view_proc, NULL);
 
   /* populate camera menu */
   camera.selector = menu_add_submenu(&camera, 0, 0, NULL, "return");

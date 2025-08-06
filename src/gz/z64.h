@@ -907,7 +907,8 @@ typedef struct
 
 enum z64_actor_id
 {
-  Z64_ACTOR_EN_HOLL = 0x0023
+  Z64_ACTOR_EN_HOLL     = 0x0023,
+  Z64_ACTOR_EN_EX_RUPPY = 0x0131
 };
 
 enum z64_actor_type

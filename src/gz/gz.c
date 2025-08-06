@@ -403,6 +403,7 @@ static void main_hook(void)
   gz_cull_view();
   gz_path_view();
   gz_holl_view();
+  gz_diving_game_view();
   gz_guard_view();
   gz_debug_view();
 

@@ -70,6 +70,15 @@ enum path_view_state
   PATHVIEW_RESTARTING,
 };
 
+enum diving_game_view_state
+{
+  DIVING_GAME_VIEW_INACTIVE,
+  DIVING_GAME_VIEW_START,
+  DIVING_GAME_VIEW_ACTIVE,
+  DIVING_GAME_VIEW_BEGIN_STOP,
+  DIVING_GAME_VIEW_STOP,
+};
+
 enum guard_view_state
 {
   GUARDVIEW_INACTIVE,
@@ -208,6 +217,7 @@ struct gz
   enum cull_view_state  cull_view_state;
   enum path_view_state  path_view_state;
   enum holl_view_state  holl_view_state;
+  enum diving_game_view_state diving_game_view_state;
   enum guard_view_state guard_view_state;
   _Bool                 noclip_on;
   _Bool                 hide_rooms;
@@ -283,6 +293,7 @@ void          gz_hit_view(void);
 void          gz_cull_view(void);
 void          gz_path_view(void);
 void          gz_holl_view(void);
+void          gz_diving_game_view(void);
 void          gz_guard_view(void);
 void          gz_debug_view(void);
 

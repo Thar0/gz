@@ -1929,6 +1929,54 @@ void gz_holl_view(void)
   }
 }
 
+void gz_diving_game_view(void)
+{
+  /* Setup + end is 10 cmds, 3 cmds per sphere up to 10, need 1 + 10 matrices */
+  const int dg_view_cap = 0x300;
+  static Gfx *dg_view_buf[2] = { NULL, NULL };
+  static int dg_view_idx = 0;
+  _Bool enable = zu_in_game() && z64_game.pause_ctxt.state == 0;
+
+  if (gz.diving_game_view_state == DIVING_GAME_VIEW_START) {
+    Gfx *mem = malloc(2 * sizeof(Gfx) * dg_view_cap);
+    dg_view_buf[0] = &mem[0 * dg_view_cap];
+    dg_view_buf[1] = &mem[1 * dg_view_cap];
+    gz.diving_game_view_state = DIVING_GAME_VIEW_ACTIVE;
+  }
+
+  if (enable && gz.diving_game_view_state == DIVING_GAME_VIEW_ACTIVE) {
+    Gfx *dg_gfx = dg_view_buf[dg_view_idx];
+    Gfx *dg_gfx_p = dg_gfx;
+    Gfx *dg_gfx_d = dg_gfx + dg_view_cap;
+    dg_view_idx = (dg_view_idx + 1) % 2;
+
+    init_poly_gfx(&dg_gfx_p, &dg_gfx_d, SETTINGS_COLVIEW_SURFACE, 1, 1);
+
+    gDPSetPrimColor(dg_gfx_p++, 0, 0, 0xFF, 0xFF, 0xFF, 0x80);
+
+    for (z64_actor_t *actor = z64_game.actor_list[Z64_ACTORTYPE_PROP].first;
+         actor != NULL;
+         actor = actor->next) {
+      if (actor->actor_id == Z64_ACTOR_EN_EX_RUPPY)
+        draw_ico_sphere(&dg_gfx_p, &dg_gfx_d,
+                        actor->pos_2.x, actor->pos_2.y, actor->pos_2.z, 30);
+    }
+
+    gSPEndDisplayList(dg_gfx_p++);
+    dcache_wb(dg_gfx, sizeof(*dg_gfx) * dg_view_cap);
+
+    gSPDisplayList(z64_ctxt.gfx->poly_xlu.p++, dg_gfx);
+  }
+
+  if (gz.diving_game_view_state == DIVING_GAME_VIEW_BEGIN_STOP)
+    gz.diving_game_view_state = DIVING_GAME_VIEW_STOP;
+  else if (gz.diving_game_view_state == DIVING_GAME_VIEW_STOP) {
+    release_mem(&dg_view_buf[0]);
+    dg_view_buf[1] = NULL;
+    gz.diving_game_view_state = DIVING_GAME_VIEW_INACTIVE;
+  }
+}
+
 void gz_guard_view(void)
 {
   const int guard_view_cap = 0x800;
