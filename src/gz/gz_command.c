@@ -334,8 +334,11 @@ void command_playmacro(void)
 {
   if (gz.movie_state == MOVIE_PLAYING)
     gz.movie_state = MOVIE_IDLE;
-  else if (gz.movie_input.size > 0)
+  else if (gz.movie_input.size > 0) {
     gz.movie_state = MOVIE_PLAYING;
+    gz.a_press_ctr = 0;
+    gz.a_press_held = 0;
+  }
 }
 
 void command_colview(void)

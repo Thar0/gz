@@ -218,6 +218,9 @@ struct gz
   _Bool                 frame_flag;
   struct selected_actor selected_actor;
   int                   metronome_timer;
+  int                   a_press_ctr;
+  _Bool                 a_press_held;
+  _Bool                 double_text_hack;
 };
 
 void          gz_apply_settings();

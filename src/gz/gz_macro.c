@@ -534,6 +534,8 @@ static void quick_play_proc(struct menu_item *item, void *data)
   else {
     gz_movie_rewind();
     gz.movie_state = MOVIE_PLAYING;
+    gz.a_press_ctr = 0;
+    gz.a_press_held = 0;
     int slot = gz.state_slot;
     gz.state_slot = 0;
     command_loadstate();

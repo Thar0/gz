@@ -352,6 +352,21 @@ static void main_hook(void)
     }
   }
 
+  /* draw A press counter */
+  gz.double_text_hack = 1;
+  gfx_mode_configure(GFX_MODE_TEXT, GFX_TEXT_NORMAL);
+  gfx_mode_set(GFX_MODE_COLOR,
+               gz.a_press_held ?
+                 GPACK_RGBA8888(0x5A, 0x5A, 0xFF, alpha) :
+                 GPACK_RGBA8888(0xC0, 0xC0, 0xC0, alpha));
+  gfx_printf(font, Z64_SCREEN_WIDTH - 145, Z64_SCREEN_HEIGHT - 11,
+             "%3i A Presses", gz.a_press_ctr);
+  gz.double_text_hack = 0;
+  if (settings->bits.font_resource == RES_FONT_FIPPS)
+    gfx_mode_configure(GFX_MODE_TEXT, GFX_TEXT_NORMAL);
+  else
+    gfx_mode_configure(GFX_MODE_TEXT, GFX_TEXT_FAST);
+
   /* execute and draw lag counter */
   if (settings->bits.lag_counter) {
     int32_t lag_frames = (int32_t)__osViIntrCount +
@@ -669,6 +684,10 @@ HOOK void input_hook(void)
           gz.reset_flag = reset;
       }
     }
+    /* Count A presses from controller 1, as the game would see them */
+    if (zi[0].pad_pressed & 0x8000)
+      gz.a_press_ctr++;
+    gz.a_press_held = zi[0].raw.a;
   }
 }
 
@@ -1161,6 +1180,9 @@ static void init(void)
     gz.state_buf[i] = NULL;
   gz.state_slot = 0;
   gz.reset_flag = 0;
+  gz.a_press_ctr = 0;
+  gz.a_press_held = 0;
+  gz.double_text_hack = 0;
 
   /* initialize io device */
   io_init();

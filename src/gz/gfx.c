@@ -8,6 +8,7 @@
 #include "util.h"
 #include "z64.h"
 #include "zu.h"
+#include "gz.h"
 
 #define           GFX_DISP_SIZE     0x10000
 static Gfx       *gfx_disp;
@@ -34,7 +35,7 @@ struct gfx_font  *gfx_char_font;
 static
 struct vector     gfx_chars[CHAR_TILE_MAX];
 
-static void draw_chars(const struct gfx_font *font, int x, int y,
+static void draw_chars(const struct gfx_font *font, qs102_t x, qs102_t y,
                        const char *buf, size_t l);
 static void flush_chars(void);
 static void gfx_printf_n_va(const struct gfx_font *font, int x, int y,
@@ -550,11 +551,13 @@ void gfx_printf_f(const struct gfx_font *font, int x, int y,
   va_end(args);
 }
 
-static void draw_chars(const struct gfx_font *font, int x, int y,
+static void draw_chars(const struct gfx_font *font, qs102_t x, qs102_t y,
                        const char *buf, size_t l)
 {
-  x -= font->x;
-  y -= font->baseline;
+  const float text_scale = gz.double_text_hack ? 1.25f : 1.0f;
+  const float text_inv_scale = gz.double_text_hack ? (1 / 1.25f) : 1.0f;
+  x -= qs102(font->x);
+  y -= qs102(font->baseline);
   struct gfx_texture *texture = font->texture;
   int chars_per_tile = font->chars_xtile * font->chars_ytile;
   int n_tiles = texture->tiles_x * texture->tiles_y;
@@ -565,7 +568,8 @@ static void draw_chars(const struct gfx_font *font, int x, int y,
     _Bool tile_loaded = 0;
     int cx = 0;
     int cy = 0;
-    for (int j = 0; j < l; ++j, cx += font->char_width + font->letter_spacing) {
+    int xinc = qs102(text_scale * font->char_width) + qs102(font->letter_spacing);
+    for (int j = 0; j < l; ++j, cx += xinc) {
       uint8_t c = buf[j];
       if (c < font->code_start || c >= font->code_start + n_chars)
         continue;
@@ -578,16 +582,16 @@ static void draw_chars(const struct gfx_font *font, int x, int y,
         gfx_rdp_load_tile(texture, i);
       }
       gSPScisTextureRectangle(gfx_disp_p++,
-                              qs102(x + cx),
-                              qs102(y + cy),
-                              qs102(x + cx + font->char_width),
-                              qs102(y + cy + font->char_height),
+                              x + cx,
+                              y + cy,
+                              x + cx + qs102(text_scale * font->char_width),
+                              y + cy + qs102(text_scale * font->char_height),
                               G_TX_RENDERTILE,
                               qu105(c % font->chars_xtile *
                                     font->char_width),
                               qu105(c / font->chars_xtile *
                                     font->char_height),
-                              qu510(1), qu510(1));
+                              qu510(text_inv_scale), qu510(text_inv_scale));
     }
   }
   gfx_synced = 0;
@@ -643,10 +647,13 @@ static void gfx_printf_n_va(const struct gfx_font *font, int x, int y,
     uint8_t a = gfx_modes[GFX_MODE_COLOR] & 0xFF;
     a = a * a / 0xFF;
     gfx_mode_replace(GFX_MODE_COLOR, GPACK_RGBA8888(0x00, 0x00, 0x00, a));
-    draw_chars(font, x + 1, y + 1, buf, l);
+    draw_chars(font,
+               qs102(x + 1) + qs102(0.5) * gz.double_text_hack,
+               qs102(y + 1) + qs102(0.5) * gz.double_text_hack,
+               buf, l);
     gfx_mode_pop(GFX_MODE_COLOR);
   }
-  draw_chars(font, x, y, buf, l);
+  draw_chars(font, qs102(x), qs102(y), buf, l);
 }
 
 static void gfx_printf_f_va(const struct gfx_font *font, int x, int y,
